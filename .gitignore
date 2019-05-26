@@ -1,0 +1,11 @@
+#ignore the eu-flood-dataset
+eu-flood-dataset/
+
+#ignore the cityscape dataset
+leftImg8bit/
+
+#ignore the data
+data/
+
+#ignore the features
+features/
