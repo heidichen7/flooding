@@ -2,10 +2,18 @@
 eu-flood-dataset/
 
 #ignore the cityscape dataset
-leftImg8bit/
+data/leftImg8bit/
 
 #ignore the data
-data/
+data/test_data/
+
+#ignore the data
+data/train
+data/test
+data/val
+data/test.zip
+data/train.zip
+data/val.zip
 
 #ignore the features
 features/
