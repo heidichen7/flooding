@@ -14,13 +14,13 @@ import copy
 
 
 def imshow(inp, title=None):
-"""
-Displays batch of images and corresponding labels.
-Use with show_databatch.
+    """
+    Displays batch of images and corresponding labels.
+    Use with show_databatch.
 
-inp: batch of images
-title: list of labels for each image
-"""
+    inp: batch of images
+    title: list of labels for each image
+    """
     inp = inp.numpy().transpose((1, 2, 0))
     # plt.figure(figsize=(10, 10)) #resize
     plt.axis('off')
@@ -30,19 +30,19 @@ title: list of labels for each image
     plt.pause(0.001)
 
 def show_databatch(inputs, classes):
-"""
-Usage:
-inputs, classes = next(iter(dataloaders[TRAIN]))
-show_databatch(inputs, classes)
-"""
+    """
+    Usage:
+    inputs, classes = next(iter(dataloaders[TRAIN]))
+    show_databatch(inputs, classes)
+    """
     out = torchvision.utils.make_grid(inputs)
     imshow(out, title=[class_names[x] for x in classes])
 
 
 def visualize_model(vgg, num_images=6):
-"""
-For given trained model, displays sample predicted labels and images.
-"""
+    """
+    For given trained model, displays sample predicted labels and images.
+    """
     was_training = vgg.training
 
     # Set model for evaluation
@@ -81,10 +81,10 @@ For given trained model, displays sample predicted labels and images.
     vgg.train(mode=was_training) # Revert model back to original training state
 
 def eval_model(vgg, criterion):
-"""
-Displays model train/test accuracy.
-Example criterion: "nn.CrossEntropyLoss()""
-"""
+    """
+    Displays model train/test accuracy.
+    Example criterion: "nn.CrossEntropyLoss()""
+    """
     since = time.time()
     avg_loss = 0
     avg_acc = 0

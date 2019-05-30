@@ -1,9 +1,13 @@
 from torch.utils.data.dataset import Dataset
 from torchvision import transforms
+import pandas as pd
+import numpy as np
 import const
+from PIL import Image
+
 
 class FloodDataset(Dataset):
-    def __init__(self, csv_path, transforms_dict=None):
+    def __init__(self, csv_path, image_path, transforms_dict=None):
         """
         Args:
             csv_path (string): path to csv file. column 0 = image names (with .jpg), column 1 = flood labels
@@ -22,15 +26,17 @@ class FloodDataset(Dataset):
         self.label_arr = np.asarray(self.data_info.iloc[:, 1])
         # Calculate len
         self.data_len = len(self.data_info.index)
+        #save path for get_item
+        self.image_path = image_path
 
     def __getitem__(self, index):
         # Get image name from the pandas df
-        single_image_name = self.image_arr[index]
+        single_image_name = self.image_path + self.image_arr[index]
         # Open image
         img_as_img = Image.open(single_image_name)
         #Transforms
         if self.transforms is not None:
-            data = self.transforms(data)
+            img_as_img = self.transforms(img_as_img)
         # Transform image to tensor
         img_as_tensor = self.to_tensor(img_as_img)
         # Get label(class) of the image based on the cropped pandas column
@@ -62,8 +68,8 @@ def load_data(presaved=True):
         ])
     }
 
-    train_data = FloodDataset(const.TRAIN_PATH, data_transforms['train'])
-    val_data = FloodDataset(const.VAL_PATH, data_transforms['val'])
-    test_data = FloodDataset(const.TEST_PATH, data_transforms['test'])
+    train_data = FloodDataset(const.TRAIN_CSV_PATH, const.TRAIN_PATH, data_transforms['train'])
+    val_data = FloodDataset(const.VAL_CSV_PATH, const.VAL_PATH, data_transforms['val'])
+    test_data = FloodDataset(const.TEST_CSV_PATH, const.TEST_PATH, data_transforms['test'])
 
     return train_data, val_data, test_data
