@@ -9,4 +9,4 @@ TEST_CSV_PATH = "data/test_data.csv"
 
 PROTOFILE = "utils/residual-attention-network/imagenet_model/AttentionNeXt-56-deploy.prototxt"
 
-CLASS_NAMES = [0, 1]
+CLASS_NAMES = ["not_flood", "flood"]

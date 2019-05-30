@@ -12,6 +12,8 @@ import os
 import pickle
 import copy
 
+import const
+
 
 def imshow(inp, title=None):
     """
@@ -36,7 +38,7 @@ def show_databatch(inputs, classes):
     show_databatch(inputs, classes)
     """
     out = torchvision.utils.make_grid(inputs)
-    imshow(out, title=[class_names[x] for x in classes])
+    imshow(out, title=[const.CLASS_NAMES[int(x)] for x in list(classes)])
 
 
 def visualize_model(vgg, num_images=6):

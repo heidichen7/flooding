@@ -1,4 +1,5 @@
 from torch.utils.data.dataset import Dataset
+from torch.utils.data import DataLoader
 from torchvision import transforms
 import pandas as pd
 import numpy as np
@@ -68,8 +69,10 @@ def load_data(presaved=True):
         ])
     }
 
-    train_data = FloodDataset(const.TRAIN_CSV_PATH, const.TRAIN_PATH, data_transforms['train'])
-    val_data = FloodDataset(const.VAL_CSV_PATH, const.VAL_PATH, data_transforms['val'])
-    test_data = FloodDataset(const.TEST_CSV_PATH, const.TEST_PATH, data_transforms['test'])
+    train_set = FloodDataset(const.TRAIN_CSV_PATH, const.TRAIN_PATH, data_transforms['train'])
+    val_set = FloodDataset(const.VAL_CSV_PATH, const.VAL_PATH, data_transforms['val'])
+    test_set = FloodDataset(const.TEST_CSV_PATH, const.TEST_PATH, data_transforms['test'])
 
+    train_data, val_data, test_data = [DataLoader \
+    (x, batch_size=8,shuffle=True, num_workers=4) for x in [train_set, val_set, test_set]]
     return train_data, val_data, test_data
