@@ -1,5 +1,8 @@
 import torch
 from torchvision import models
+import os
+import torch.nn as nn
+import const
 
 # class VGG16_Baseline(torch.nn.Module):
 #     def __init__(self, D_in, H, D_out):
@@ -23,7 +26,7 @@ from torchvision import models
 
 def res_attention():
     net = CaffeNet(const.PROTOFILE)
-    
+
 
 def baseline():
     # load in vgg16 model
@@ -42,3 +45,4 @@ def baseline():
     features = list(vgg16.classifier.children())[:-1] # Remove last layer
     features.extend([nn.Linear(num_features, len(const.CLASS_NAMES))]) # Add our layer with 4 outputs
     vgg16.classifier = nn.Sequential(*features) # Replace the model classifier
+    return vgg16

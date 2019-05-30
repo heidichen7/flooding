@@ -14,6 +14,7 @@ import copy
 
 import const
 
+use_gpu = torch.cuda.is_available()
 
 def imshow(inp, title=None):
     """
@@ -41,7 +42,7 @@ def show_databatch(inputs, classes):
     imshow(out, title=[const.CLASS_NAMES[int(x)] for x in list(classes)])
 
 
-def visualize_model(vgg, num_images=6):
+def visualize_model(vgg, test_data, num_images=6):
     """
     For given trained model, displays sample predicted labels and images.
     """
@@ -53,7 +54,7 @@ def visualize_model(vgg, num_images=6):
 
     images_so_far = 0
 
-    for i, data in enumerate(dataloaders[TEST]):
+    for i, data in enumerate(test_data):
         inputs, labels = data
         size = inputs.size()[0]
 
@@ -82,7 +83,7 @@ def visualize_model(vgg, num_images=6):
 
     vgg.train(mode=was_training) # Revert model back to original training state
 
-def eval_model(vgg, criterion):
+def eval_model(vgg, test_data, criterion):
     """
     Displays model train/test accuracy.
     Example criterion: "nn.CrossEntropyLoss()""
@@ -94,11 +95,11 @@ def eval_model(vgg, criterion):
     acc_test = 0
 
 
-    test_batches = len(dataloaders[TEST])
+    test_batches = len(test_data)
     print("Evaluating model")
     print('-' * 10)
 
-    for i, data in enumerate(dataloaders[TEST]):
+    for i, data in enumerate(test_data):
         if i % 100 == 0:
             print("\rTest batch {}/{}".format(i, test_batches), end='', flush=True)
 
