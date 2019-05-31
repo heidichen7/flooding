@@ -24,7 +24,7 @@ class FloodDataset(Dataset):
         # First column contains the image paths
         self.image_arr = np.asarray(self.data_info.iloc[:, 0])
         # Second column is the labels
-        self.label_arr = np.asarray(self.data_info.iloc[:, 1])
+        self.label_arr = np.asarray(self.data_info.iloc[:, 1]).astype(int)
         # Calculate len
         self.data_len = len(self.data_info.index)
         #save path for get_item
