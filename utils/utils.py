@@ -149,7 +149,6 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
     loss_hist = []
 
     train_batches = len(train_data)
-    print (train_batches)
 #     return None
     val_batches = len(val_data)
 
@@ -205,7 +204,7 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
 
         vgg.train(False)
         vgg.eval()
-
+        
         for i, data in enumerate(val_data):
             if i % 100 == 0:
                 print("\rValidation batch {}/{}".format(i, val_batches), end='', flush=True)
