@@ -24,8 +24,8 @@ import const
 #         y_pred = self.linear2(h_relu)
 #         return y_pred
 
-def res_attention():
-    net = CaffeNet(const.PROTOFILE)
+# def res_attention():
+#     net = CaffeNet(const.PROTOFILE)
 
 
 def baseline():

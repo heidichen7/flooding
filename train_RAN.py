@@ -85,7 +85,7 @@ classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 model = ResidualAttentionModel().cuda()
 print(model)
-
+print ("\n\nStarting training.")
 lr = 0.1  # 0.1
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9, nesterov=True, weight_decay=0.0001)
