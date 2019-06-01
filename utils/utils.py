@@ -67,12 +67,12 @@ def visualize_model(vgg, test_data, num_images=6):
             outputs = vgg(inputs)
 
             _, preds = torch.max(outputs.data, 1)
-            predicted_labels = [preds[j] for j in range(inputs.size()[0])]
+            predicted_labels = [preds[j].item() for j in range(inputs.size()[0])]
 
             print("Ground truth:")
             show_databatch(inputs.data.cpu(), labels.data.cpu())
             print("Prediction:")
-            show_databatch(inputs.data.cpu(), predicted_labels)
+            show_databatch(inputs.data.cpu(), np.clip(predicted_labels, 0, 1))
 
             del inputs, labels, outputs, preds, predicted_labels
             torch.cuda.empty_cache()
@@ -99,6 +99,7 @@ def eval_model(vgg, test_data, criterion):
     print("Evaluating model")
     print('-' * 10)
 
+    print(enumerate(test_data))
     for i, data in enumerate(test_data):
         if i % 100 == 0:
             print("\rTest batch {}/{}".format(i, test_batches), end='', flush=True)
@@ -118,14 +119,14 @@ def eval_model(vgg, test_data, criterion):
 
             loss = criterion(outputs, labels)
 
-            loss_test += loss.data[0]
+            loss_test += loss.data.item()
             acc_test += torch.sum(preds == labels.data)
 
             del inputs, labels, outputs, preds
             torch.cuda.empty_cache()
 
-    avg_loss = loss_test / dataset_sizes[TEST]
-    avg_acc = acc_test.item() / dataset_sizes[TEST]
+    avg_loss = loss_test / len(test_data.dataset)
+    avg_acc = acc_test.item() / len(test_data.dataset)
 
 #     print (acc_test.cpu() / dataset_sizes[TEST])
 
@@ -136,7 +137,7 @@ def eval_model(vgg, test_data, criterion):
     print("Avg acc (test): {:.4f}".format(avg_acc))
     print('-' * 10)
 
-def train_model(vgg, criterion, optimizer, scheduler, num_epochs=10):
+def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_epochs=10):
     since = time.time()
     best_model_wts = copy.deepcopy(vgg.state_dict())
     best_acc = 0.0
@@ -147,10 +148,10 @@ def train_model(vgg, criterion, optimizer, scheduler, num_epochs=10):
     avg_acc_val = 0
     loss_hist = []
 
-    train_batches = len(dataloaders[TRAIN])
-#     print (train_batches)
+    train_batches = len(train_data)
+    print (train_batches)
 #     return None
-    val_batches = len(dataloaders[VAL])
+    val_batches = len(val_data)
 
     for epoch in range(num_epochs):
         print("Epoch {}/{}".format(epoch, num_epochs))
@@ -163,7 +164,8 @@ def train_model(vgg, criterion, optimizer, scheduler, num_epochs=10):
 
         vgg.train(True)
 
-        for i, data in enumerate(dataloaders[TRAIN]):
+        for i, data in enumerate(train_data):
+            print(i)
             if i % 100 == 0:
                 print("\rTraining batch {}/{}".format(i, train_batches / 2), end='', flush=True)
 
@@ -187,8 +189,7 @@ def train_model(vgg, criterion, optimizer, scheduler, num_epochs=10):
 
             loss.backward()
             optimizer.step()
-
-            loss_train += loss.data[0]
+            loss_train += loss.item()
             acc_train += torch.sum(preds == labels.data)
 
             del inputs, labels, outputs, preds
@@ -199,13 +200,13 @@ def train_model(vgg, criterion, optimizer, scheduler, num_epochs=10):
         print()
         # * 2 as we only used half of the dataset
         print (acc_train)
-        avg_loss = loss_train * 2 / dataset_sizes[TRAIN]
-        avg_acc = acc_train.item() * 2 / dataset_sizes[TRAIN]
+        avg_loss = loss_train * 2 / len(train_data.dataset)
+        avg_acc = acc_train.item() * 2 / len(train_data.dataset)
 
         vgg.train(False)
         vgg.eval()
 
-        for i, data in enumerate(dataloaders[VAL]):
+        for i, data in enumerate(val_data):
             if i % 100 == 0:
                 print("\rValidation batch {}/{}".format(i, val_batches), end='', flush=True)
 
@@ -223,15 +224,15 @@ def train_model(vgg, criterion, optimizer, scheduler, num_epochs=10):
                 _, preds = torch.max(outputs.data, 1)
                 loss = criterion(outputs, labels)
 
-                loss_val += loss.data[0]
+                loss_val += loss.item()
 
                 acc_val += torch.sum(preds == labels.data)
 
                 del inputs, labels, outputs, preds
                 torch.cuda.empty_cache()
 
-            avg_loss_val = loss_val / dataset_sizes[VAL]
-            avg_acc_val = acc_val.item() / dataset_sizes[VAL]
+            avg_loss_val = loss_val / len(val_data.dataset)
+            avg_acc_val = acc_val.item() / len(val_data.dataset)
 
             print()
             print("Epoch {} result: ".format(epoch))
