@@ -11,6 +11,8 @@ import os
 import cv2
 import time
 
+import dataset #our code
+
 # from model.residual_attention_network_pre import ResidualAttentionModel
 # based https://github.com/liudaizong/Residual-Attention-Network
 from model.residual_attention_network import ResidualAttentionModel_92_32input_update as ResidualAttentionModel
@@ -52,34 +54,32 @@ def test(model, test_loader, btrain=False, model_file='model_92.pkl'):
     return correct / total
 
 
-# Image Preprocessing
-transform = transforms.Compose([
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomCrop((32, 32), padding=4),   #left, top, right, bottom
-    # transforms.Scale(224),
-    transforms.ToTensor()
-])
-test_transform = transforms.Compose([
-    transforms.ToTensor()
-])
-# when image is rgb, totensor do the division 255
-# CIFAR-10 Dataset
-train_dataset = datasets.CIFAR10(root='./data_cifar/',
-                               train=True,
-                               transform=transform,
-                               download=True)
- 
-test_dataset = datasets.CIFAR10(root='./data_cifar/',
-                              train=False,
-                              transform=test_transform)
+# # Image Preprocessing
+# transform = transforms.Compose([
+#     transforms.RandomHorizontalFlip(),
+#     transforms.RandomCrop((32, 32), padding=4),   #left, top, right, bottom
+#     # transforms.Scale(224),
+#     transforms.ToTensor()
+# ])
+# test_transform = transforms.Compose([
+#     transforms.ToTensor()
+# ])
+# # when image is rgb, totensor do the division 255
+# # CIFAR-10 Dataset
+# train_dataset = datasets.CIFAR10(root='./data_cifar/',
+#                                train=True,
+#                                transform=transform,
+#                                download=True)
+#
+# test_dataset = datasets.CIFAR10(root='./data_cifar/',
+#                               train=False,
+#                               transform=test_transform)
 
 # Data Loader (Input Pipeline)
-train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                           batch_size=64, # 64
-                                           shuffle=True, num_workers=1)
-test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-                                          batch_size=20,
-                                          shuffle=False)
+train_loader, dev_loader, test_loader = dataset.load_data()
+# test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
+#                                           batch_size=20,
+#                                           shuffle=False)
 
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
