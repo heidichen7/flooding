@@ -153,7 +153,7 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
     val_batches = len(val_data)
 
     for epoch in range(num_epochs):
-        print("Epoch {}/{}".format(epoch, num_epochs))
+        print("Epoch {}/{}".format(epoch + 1, num_epochs))
         print('-' * 10)
 
         loss_train = 0
@@ -164,7 +164,6 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
         vgg.train(True)
 
         for i, data in enumerate(train_data):
-            print(i)
             if i % 100 == 0:
                 print("\rTraining batch {}/{}".format(i, train_batches / 2), end='', flush=True)
 
@@ -234,7 +233,7 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
             avg_acc_val = acc_val.item() / len(val_data.dataset)
 
             print()
-            print("Epoch {} result: ".format(epoch))
+            print("Epoch {} result: ".format(epoch + 1))
             print("Avg loss (train): {:.4f}".format(avg_loss))
             print("Avg acc (train): {:.4f}".format(avg_acc))
             print("Avg loss (val): {:.4f}".format(avg_loss_val))
