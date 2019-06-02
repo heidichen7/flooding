@@ -229,11 +229,11 @@ class ResidualAttentionModel_92_32input_update(nn.Module):
         super(ResidualAttentionModel_92_32input_update, self).__init__()
         self.conv1 = nn.Sequential(
             nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(224),
+            nn.BatchNorm2d(32),
             nn.ReLU(inplace=True)
         )  # 32*32
         # self.mpool1 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # 16*16
-        self.residual_block1 = ResidualBlock(224, 128)  # 32*32
+        self.residual_block1 = ResidualBlock(32, 128)  # 32*32
         self.attention_module1 = AttentionModule_stage1_cifar(128, 128, size1=(32, 32), size2=(16, 16))  # 32*32
         self.residual_block2 = ResidualBlock(128, 256, 2)  # 16*16
         self.attention_module2 = AttentionModule_stage2_cifar(256, 256, size=(16, 16))  # 16*16
