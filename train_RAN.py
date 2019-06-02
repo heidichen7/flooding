@@ -84,7 +84,7 @@ train_loader, dev_loader, test_loader = dataset.load_data()
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 model = ResidualAttentionModel().cuda()
-print(model)
+#print(model)
 print ("\n\nStarting training.")
 lr = 0.1  # 0.1
 criterion = nn.CrossEntropyLoss()
