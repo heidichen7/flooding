@@ -140,7 +140,7 @@ def eval_model(vgg, test_data, criterion):
     print("Avg acc (test): {:.4f}".format(avg_acc))
     print('-' * 10)
 
-def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_epochs=10):
+def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_epochs=10, log_freq=2):
     tbx = SummaryWriter('save/')
     since = time.time()
     best_model_wts = copy.deepcopy(vgg.state_dict())
@@ -236,6 +236,8 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
 
             del inputs, labels, outputs, preds, data, loss
             torch.cuda.empty_cache()
+        if ((epoch+1) % log_freq == 0):
+            torch.save(model.state_dict(), 'save/weights_' + str(epoch) + '.pth')
 
 
         avg_loss_val = loss_val / len(val_data.dataset)
