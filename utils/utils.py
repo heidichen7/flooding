@@ -12,6 +12,8 @@ import os
 import pickle
 import sys
 import copy
+from tensorboardX import SummaryWriter
+from tqdm import tqdm
 
 import const
 
@@ -55,7 +57,7 @@ def visualize_model(vgg, test_data, num_images=6):
 
     images_so_far = 0
 
-    for i, data in enumerate(test_data):
+    for i, data in tqdm(enumerate(test_data)):
         inputs, labels = data
         size = inputs.size()[0]
 
@@ -101,7 +103,7 @@ def eval_model(vgg, test_data, criterion):
     print('-' * 10)
 
     print(enumerate(test_data))
-    for i, data in enumerate(test_data):
+    for i, data in tqdm(enumerate(test_data)):
         if i % 100 == 0:
             print("\rTest batch {}/{}".format(i, test_batches), end='', flush=True)
 
@@ -139,6 +141,7 @@ def eval_model(vgg, test_data, criterion):
     print('-' * 10)
 
 def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_epochs=10):
+    tbx = SummaryWriter('save/')
     since = time.time()
     best_model_wts = copy.deepcopy(vgg.state_dict())
     best_acc = 0.0
@@ -166,7 +169,7 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
 
         vgg.train(True)
 
-        for i, data in enumerate(train_data):
+        for i, data in tqdm(enumerate(train_data)):
             if i % 100 == 0:
                 print("\rTraining batch {}/{}".format(i, train_batches / 2), end='', flush=True)
 
@@ -175,7 +178,7 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
                 break
 
             inputs, labels = data
-            
+
             if use_gpu:
                 inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
             else:
@@ -205,10 +208,11 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
         avg_loss = loss_train * 2 / len(train_data.dataset)
         avg_acc = acc_train.item() * 2 / len(train_data.dataset)
         train_acc_hist.append(avg_acc)
-
+        tbx.add_scalar('train/loss', avg_loss, epoch)
+        tbx.add_scalar('train/accuracy', avg_acc, epoch)
         vgg.train(False)
         vgg.eval()
-        
+
         for i, data in enumerate(val_data):
             if i % 100 == 0:
                 print("\rValidation batch {}/{}".format(i, val_batches), end='', flush=True)
@@ -232,12 +236,13 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
 
             del inputs, labels, outputs, preds, data, loss
             torch.cuda.empty_cache()
-            
+
 
         avg_loss_val = loss_val / len(val_data.dataset)
         avg_acc_val = acc_val.item() / len(val_data.dataset)
         val_acc_hist.append(avg_acc_val)
-
+        tbx.add_scalar('val/loss', avg_loss_val, epoch)
+        tbx.add_scalar('val/accuracy', avg_acc_val, epoch)
         print()
         print("Epoch {} result: ".format(epoch + 1))
         print("Avg loss (train): {:.4f}".format(avg_loss))
@@ -250,7 +255,7 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
         if avg_acc_val > best_acc:
             best_acc = avg_acc_val
             best_model_wts = copy.deepcopy(vgg.state_dict())
-            
+
         del avg_loss_val, avg_acc_val, avg_loss, avg_acc
         torch.cuda.empty_cache()
 
