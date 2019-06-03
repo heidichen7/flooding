@@ -34,7 +34,7 @@ class FloodDataset(Dataset):
         # Get image name from the pandas df
         single_image_name = self.image_path + self.image_arr[index]
         # Open image
-        img_as_img = Image.open(single_image_name)
+        img_as_img = Image.open(single_image_name).convert('RGB')
         #Transforms
         if self.transforms is not None:
             img_as_img = self.transforms(img_as_img)
