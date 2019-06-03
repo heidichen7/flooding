@@ -15,21 +15,26 @@ import time
 import os
 import pickle
 import copy
+from model.residual_attention_network import ResidualAttentionModel_92_32input_update as ResidualAttentionModel
 
-def main():
+def main(modeltype='baseline'):
     #data data data!
     train_data, val_data, test_data = load_data()
 
     #initialize model
-    model = flood_models.baseline()
+    if modeltype == 'baseline':
+        model = flood_models.baseline()
+    else if modeltype == 'attention':
+        model = ResidualAttentionModel()
+
     use_gpu = torch.cuda.is_available()
     if use_gpu:
         model.cuda() #.cuda() will move everything to the GPU side
 
     #define loss, optimizer, loss decay
     criterion = nn.CrossEntropyLoss()
-    optimizer_ft = optim.SGD(model.parameters(), lr=0.001, momentum=.9)
-    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+    optimizer_ft = optim.Adam(model.parameters(), lr=0.001)
+    # exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
     #test before training (optional)
     eval_model(model, test_data, criterion)
