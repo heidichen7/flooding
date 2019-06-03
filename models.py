@@ -30,7 +30,7 @@ import const
 
 def baseline():
     # load in vgg16 model
-    if 'heidi' in os.getcwd():
+    if False:
         vgg16 = models.vgg16()
         vgg16.load_state_dict(torch.load("C:/Users/heidi/.torch/models/vgg16-397923af.pth"))
     else:

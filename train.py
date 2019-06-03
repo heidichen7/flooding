@@ -34,7 +34,7 @@ def main():
     #test before training (optional)
     eval_model(model, test_data, criterion)
     #train
-    trained_model, loss_hist = train_model(model, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=2)
+    trained_model, loss_hist_train, loss_hist_val = train_model( train_data, val_data, model, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=2)
 
     #evaluate
     eval_model(trained_model, test_data, criterion)
