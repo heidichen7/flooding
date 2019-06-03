@@ -10,6 +10,8 @@ from torchvision import transforms, datasets, models
 import os
 import cv2
 import time
+from tqdm import tqdm
+# from tensorboardX import SummaryWriter
 
 import dataset #our code
 
@@ -54,35 +56,10 @@ def test(model, test_loader, btrain=False, model_file='model_92.pkl'):
     return correct / total
 
 
-# # Image Preprocessing
-# transform = transforms.Compose([
-#     transforms.RandomHorizontalFlip(),
-#     transforms.RandomCrop((32, 32), padding=4),   #left, top, right, bottom
-#     # transforms.Scale(224),
-#     transforms.ToTensor()
-# ])
-# test_transform = transforms.Compose([
-#     transforms.ToTensor()
-# ])
-# # when image is rgb, totensor do the division 255
-# # CIFAR-10 Dataset
-# train_dataset = datasets.CIFAR10(root='./data_cifar/',
-#                                train=True,
-#                                transform=transform,
-#                                download=True)
-#
-# test_dataset = datasets.CIFAR10(root='./data_cifar/',
-#                               train=False,
-#                               transform=test_transform)
-
 # Data Loader (Input Pipeline)
 train_loader, dev_loader, test_loader = dataset.load_data()
-# test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-#                                           batch_size=20,
-#                                           shuffle=False)
 
-classes = ('plane', 'car', 'bird', 'cat',
-           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+classes = const.CLASS_NAMES
 model = ResidualAttentionModel().cuda()
 #print(model)
 print ("\n\nStarting training.")
@@ -100,7 +77,7 @@ if is_train is True:
     for epoch in range(total_epoch):
         model.train()
         tims = time.time()
-        for i, (images, labels) in enumerate(train_loader):
+        for i, (images, labels) in tqdm(enumerate(train_loader)):
             images = Variable(images.cuda())
             # print(images.data)
             labels = Variable(labels.cuda())
