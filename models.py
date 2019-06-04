@@ -6,9 +6,6 @@ import const
 from model import residual_attention_network
 
 
-def
-
-
 def baseline():
     # load in vgg16 model
     if False:

@@ -24,7 +24,7 @@ def main(modeltype='baseline'):
     #initialize model
     if modeltype == 'baseline':
         model = flood_models.baseline()
-    else if modeltype == 'attention':
+    elif modeltype == 'attention':
         model = ResidualAttentionModel()
 
     use_gpu = torch.cuda.is_available()
@@ -37,13 +37,13 @@ def main(modeltype='baseline'):
     # exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
     #test before training (optional)
-    eval_model(model, test_data, criterion)
+    #eval_model(model, test_data, criterion)
     #train
-    trained_model, loss_hist_train, loss_hist_val = train_model( train_data, val_data, model, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=100)
+    trained_model, loss_hist_train, loss_hist_val = train_model( train_data, val_data, model, criterion, optimizer_ft,  num_epochs=100)
 
     #evaluate
     eval_model(trained_model, test_data, criterion)
     visualize_model(trained_model, test_data)
 
 if __name__ == "__main__":
-    main()
+    main('attention')
