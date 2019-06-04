@@ -226,12 +226,11 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
 
                 optimizer.zero_grad()
                 outputs = vgg(inputs)
-
                 _, preds = torch.max(outputs.data, 1)
+        
                 loss = criterion(outputs, labels)
 
                 loss_val += loss.item()
-
                 acc_val += torch.sum(preds == labels.data)
 
             del inputs, labels, outputs, preds, data, loss
