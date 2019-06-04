@@ -10,8 +10,11 @@ import matplotlib.pyplot as plt
 import time
 import os
 import pickle
+import sys
 import copy
-
+from tensorboardX import SummaryWriter
+from tqdm import tqdm
+from datetime import datetime
 import const
 
 use_gpu = torch.cuda.is_available()
@@ -54,7 +57,7 @@ def visualize_model(vgg, test_data, num_images=6):
 
     images_so_far = 0
 
-    for i, data in enumerate(test_data):
+    for i, data in tqdm(enumerate(test_data)):
         inputs, labels = data
         size = inputs.size()[0]
 
@@ -100,7 +103,7 @@ def eval_model(vgg, test_data, criterion):
     print('-' * 10)
 
     print(enumerate(test_data))
-    for i, data in enumerate(test_data):
+    for i, data in tqdm(enumerate(test_data)):
         if i % 100 == 0:
             print("\rTest batch {}/{}".format(i, test_batches), end='', flush=True)
 
@@ -137,7 +140,9 @@ def eval_model(vgg, test_data, criterion):
     print("Avg acc (test): {:.4f}".format(avg_acc))
     print('-' * 10)
 
-def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_epochs=10):
+def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler=None, num_epochs=10, log_freq=2):
+    tbx = SummaryWriter('save/')
+    startrun = str(datetime.now())
     since = time.time()
     best_model_wts = copy.deepcopy(vgg.state_dict())
     best_acc = 0.0
@@ -147,14 +152,15 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
     avg_loss_val = 0
     avg_acc_val = 0
     loss_hist = []
+    train_acc_hist = []
+    val_acc_hist = []
 
     train_batches = len(train_data)
-    print (train_batches)
 #     return None
     val_batches = len(val_data)
 
     for epoch in range(num_epochs):
-        print("Epoch {}/{}".format(epoch, num_epochs))
+        print("Epoch {}/{}".format(epoch + 1, num_epochs))
         print('-' * 10)
 
         loss_train = 0
@@ -164,8 +170,7 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
 
         vgg.train(True)
 
-        for i, data in enumerate(train_data):
-            print(i)
+        for i, data in tqdm(enumerate(train_data)):
             if i % 100 == 0:
                 print("\rTraining batch {}/{}".format(i, train_batches / 2), end='', flush=True)
 
@@ -179,6 +184,7 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
                 inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
             else:
                 inputs, labels = Variable(inputs), Variable(labels)
+#             inputs, labels = Variable(inputs), Variable(labels)
 
             optimizer.zero_grad()
 
@@ -192,7 +198,7 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
             loss_train += loss.item()
             acc_train += torch.sum(preds == labels.data)
 
-            del inputs, labels, outputs, preds
+            del inputs, labels, outputs, preds, data, loss
             torch.cuda.empty_cache()
 
         loss_hist.append(loss_train)
@@ -202,7 +208,9 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
         print (acc_train)
         avg_loss = loss_train * 2 / len(train_data.dataset)
         avg_acc = acc_train.item() * 2 / len(train_data.dataset)
-
+        train_acc_hist.append(avg_acc)
+        tbx.add_scalar('train/loss', avg_loss, epoch)
+        tbx.add_scalar('train/accuracy', avg_acc, epoch)
         vgg.train(False)
         vgg.eval()
 
@@ -213,12 +221,11 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
             inputs, labels = data
             with torch.no_grad():
                 if use_gpu:
-                    inputs, labels = Variable(inputs.cuda(), volatile=True), Variable(labels.cuda(), volatile=True)
+                    inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
                 else:
                     inputs, labels = Variable(inputs), Variable(labels)
 
                 optimizer.zero_grad()
-
                 outputs = vgg(inputs)
 
                 _, preds = torch.max(outputs.data, 1)
@@ -228,30 +235,38 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler, num_
 
                 acc_val += torch.sum(preds == labels.data)
 
-                del inputs, labels, outputs, preds
-                torch.cuda.empty_cache()
+            del inputs, labels, outputs, preds, data, loss
+            torch.cuda.empty_cache()
+        if ((epoch+1) % log_freq == 0):
+            torch.save(vgg.state_dict(), 'save/weights_' + str(epoch) + '.pth')
 
-            avg_loss_val = loss_val / len(val_data.dataset)
-            avg_acc_val = acc_val.item() / len(val_data.dataset)
 
-            print()
-            print("Epoch {} result: ".format(epoch))
-            print("Avg loss (train): {:.4f}".format(avg_loss))
-            print("Avg acc (train): {:.4f}".format(avg_acc))
-            print("Avg loss (val): {:.4f}".format(avg_loss_val))
-            print("Avg acc (val): {:.4f}".format(avg_acc_val))
-            print('-' * 10)
-            print()
-
-            if avg_acc_val > best_acc:
-                best_acc = avg_acc_val
-                best_model_wts = copy.deepcopy(vgg.state_dict())
-
-        elapsed_time = time.time() - since
+        avg_loss_val = loss_val / len(val_data.dataset)
+        avg_acc_val = acc_val.item() / len(val_data.dataset)
+        val_acc_hist.append(avg_acc_val)
+        tbx.add_scalar('val/loss/' + startrun , avg_loss_val, epoch)
+        tbx.add_scalar('val/accuracy/' + startrun , avg_acc_val, epoch)
+        print()
+        print("Epoch {} result: ".format(epoch + 1))
+        print("Avg loss (train): {:.4f}".format(avg_loss))
+        print("Avg acc (train): {:.4f}".format(avg_acc))
+        print("Avg loss (val): {:.4f}".format(avg_loss_val))
+        print("Avg acc (val): {:.4f}".format(avg_acc_val))
+        print('-' * 10)
         print()
 
-        print("Training completed in {:.0f}m {:.0f}s".format(elapsed_time // 60, elapsed_time % 60))
-        print("Best acc: {:.4f}".format(best_acc))
+        if avg_acc_val > best_acc:
+            best_acc = avg_acc_val
+            best_model_wts = copy.deepcopy(vgg.state_dict())
 
-        vgg.load_state_dict(best_model_wts)
-        return vgg, loss_hist
+        del avg_loss_val, avg_acc_val, avg_loss, avg_acc
+        torch.cuda.empty_cache()
+
+    elapsed_time = time.time() - since
+    print()
+
+    print("Training completed in {:.0f}m {:.0f}s".format(elapsed_time // 60, elapsed_time % 60))
+    print("Best acc: {:.4f}".format(best_acc))
+    torch.save(best_model_wts, 'save/weights/best.pth')
+    vgg.load_state_dict(best_model_wts)
+    return vgg, loss_hist, train_acc_hist, val_acc_hist

@@ -17,3 +17,6 @@ data/val.zip
 
 #ignore the features
 features/
+
+#igore the pytorch model
+baseline/itried.pt
