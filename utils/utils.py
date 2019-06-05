@@ -100,7 +100,12 @@ def eval_model(vgg, test_data, criterion):
     loss_test = 0
     acc_test = 0
 
-
+    total_positives = 0
+    predicted_positives = 0
+    predicted_true_positives = 0
+    #recall = predicted_true_positives / total_positives
+    #precision = predicted_true_positives / predicted_positives
+    #f1 = 2 / (1/recall + 1/precision)
     test_batches = len(test_data)
     print("Evaluating model")
     print('-' * 10)
@@ -128,6 +133,11 @@ def eval_model(vgg, test_data, criterion):
             loss_test += loss.data.item()
             acc_test += torch.sum(preds == labels.data)
 
+            #adding stats for precision recall
+            total_positives += torch.sum(labels.data)
+            predicted_positives += torch.sum(preds)
+            predicted_true_positives += torch.dot(preds, labels.data)
+
             del inputs, labels, outputs, preds
             torch.cuda.empty_cache()
 
@@ -142,6 +152,14 @@ def eval_model(vgg, test_data, criterion):
     print("Avg loss (test): {:.4f}".format(avg_loss))
     print("Avg acc (test): {:.4f}".format(avg_acc))
     print('-' * 10)
+
+    precision = predicted_true_positives / predicted_positives
+    recall = predicted_true_positives / total_positives
+    f1 = 2 / (1/precision + 1/recall)
+    print("Precision (test): {:.4f}".format(precision))
+    print("Recall (test): {:.4f}".format(recall))
+    print("f1 (test): {:.4f}".format(f1))
+
 
 def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler=None, num_epochs=10, log_freq=2):
     tbx = SummaryWriter('save/')

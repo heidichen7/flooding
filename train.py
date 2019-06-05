@@ -23,7 +23,7 @@ def main(modeltype='baseline'):
 
     #initialize model
     if modeltype == 'baseline':
-        model = flood_models.baseline()
+        model = flood_models.baselineVGG16()
     elif modeltype == 'attention':
         model = ResidualAttentionModel()
 
