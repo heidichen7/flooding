@@ -34,6 +34,7 @@ def imshow(inp, title=None):
     if title is not None:
         plt.title(title)
     plt.pause(0.001)
+    plt.savefig('save/test.png')
 
 def show_databatch(inputs, classes):
     """
@@ -43,7 +44,9 @@ def show_databatch(inputs, classes):
     """
     out = torchvision.utils.make_grid(inputs)
     imshow(out, title=[const.CLASS_NAMES[int(x)] for x in list(classes)])
-
+    
+    #plt.imsave('save/test.png', out)
+    #print (classes)  
 
 def visualize_model(vgg, test_data, num_images=6):
     """
@@ -238,14 +241,14 @@ def train_model(train_data, val_data, vgg, criterion, optimizer, scheduler=None,
             del inputs, labels, outputs, preds, data, loss
             torch.cuda.empty_cache()
         if ((epoch+1) % log_freq == 0):
-            torch.save(vgg.state_dict(), 'save/weights_' + str(epoch) + '.pth')
+            torch.save(vgg.state_dict(), 'save/weights.pth')
 
 
         avg_loss_val = loss_val / len(val_data.dataset)
         avg_acc_val = acc_val.item() / len(val_data.dataset)
         val_acc_hist.append(avg_acc_val)
-        tbx.add_scalar('val/loss/' + startrun , avg_loss_val, epoch)
-        tbx.add_scalar('val/accuracy/' + startrun , avg_acc_val, epoch)
+        tbx.add_scalar('val/loss/', avg_loss_val, epoch)
+        tbx.add_scalar('val/accuracy/', avg_acc_val, epoch)
         print()
         print("Epoch {} result: ".format(epoch + 1))
         print("Avg loss (train): {:.4f}".format(avg_loss))
