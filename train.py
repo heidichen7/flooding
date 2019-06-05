@@ -17,13 +17,15 @@ import pickle
 import copy
 from model.residual_attention_network import ResidualAttentionModel_92_32input_update as ResidualAttentionModel
 
-def main(modeltype='baseline'):
+def main(modeltype='attention'):
     #data data data!
     train_data, val_data, test_data = load_data()
 
     #initialize model
-    if modeltype == 'baseline':
+    if modeltype == 'vgg':
         model = flood_models.baselineVGG16()
+    elif modeltype == 'resnet':
+        model = flood_models.baselineResNet()
     elif modeltype == 'attention':
         model = ResidualAttentionModel()
 
@@ -46,4 +48,4 @@ def main(modeltype='baseline'):
     visualize_model(trained_model, test_data)
 
 if __name__ == "__main__":
-    main('attention')
+    main('resnet')

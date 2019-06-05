@@ -8,8 +8,8 @@ from model import residual_attention_network
 def baselineResNet():
     rn18 = models.resnet18(pretrained=True)
 
-    for param in rn18.features.parameters():
-        param.require_grad = False
+    #for param in rn18.parameters():
+    #    param.require_grad = False
 
     num_ftrs = rn18.fc.in_features
     rn18.fc = nn.Linear(num_ftrs, len(const.CLASS_NAMES))

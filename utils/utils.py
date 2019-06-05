@@ -136,7 +136,7 @@ def eval_model(vgg, test_data, criterion):
             #adding stats for precision recall
             total_positives += torch.sum(labels.data)
             predicted_positives += torch.sum(preds)
-            predicted_true_positives += torch.dot(preds, labels.data)
+            predicted_true_positives += np.dot(preds.data.cpu(), labels.data.cpu())
 
             del inputs, labels, outputs, preds
             torch.cuda.empty_cache()
@@ -153,8 +153,8 @@ def eval_model(vgg, test_data, criterion):
     print("Avg acc (test): {:.4f}".format(avg_acc))
     print('-' * 10)
 
-    precision = predicted_true_positives / predicted_positives
-    recall = predicted_true_positives / total_positives
+    precision = predicted_true_positives.item() / predicted_positives.item()
+    recall = predicted_true_positives.item() / total_positives.item()
     f1 = 2 / (1/precision + 1/recall)
     print("Precision (test): {:.4f}".format(precision))
     print("Recall (test): {:.4f}".format(recall))
